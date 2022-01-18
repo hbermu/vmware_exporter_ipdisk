@@ -1,0 +1,5 @@
+vsphere_host: "vcenter"
+vsphere_port: "443"
+vsphere_user: "user"
+vsphere_password: "password"
+ignore_ssl: False
