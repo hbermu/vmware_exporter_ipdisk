@@ -6,7 +6,11 @@ LABEL name="vmware_exporter_ipdisk" \
         license="Apache License 2.0"
 
 RUN mkdir /vmware_exporter_ipdisk
-COPY . /vmware_exporter_ipdisk/
+
+ADD requirements.txt /vmware_exporter_ipdisk/requirements.txt
+ADD vmware_exporter_ipdisk.py /vmware_exporter_ipdisk/vmware_exporter_ipdisk.py
+ADD __init__.py /vmware_exporter_ipdisk/__init__.py
+
 RUN chmod +x /vmware_exporter_ipdisk/vmware_exporter_ipdisk.py && \
     pip3 install -r /vmware_exporter_ipdisk/requirements.txt
 
@@ -18,4 +22,4 @@ EXPOSE 9372
 USER vmware_exporter_ipdisk
 WORKDIR /vmware_exporter_ipdisk
 
-ENTRYPOINT ["/vmware_exporter_ipdisk/vmware_exporter_ipdisk.py"]
+ENTRYPOINT ["python3", "/vmware_exporter_ipdisk/vmware_exporter_ipdisk.py"]
