@@ -1,4 +1,4 @@
-# !/usr/bin/env python3
+# !/bin/python3
 # -*- python -*-
 # -*- coding: utf-8 -*-
 # autopep8'd
