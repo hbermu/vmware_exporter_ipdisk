@@ -88,7 +88,6 @@ class AppMetrics:
             logging.debug("Starting point to look into: {rootFolder}.".format(rootFolder=content.rootFolder))
             container = content.rootFolder
             logging.debug("Object types to look for: VirtualMachine.")
-            view_type = [vim.VirtualMachine]
             recursive = True
 
             logging.debug("Getting through the entire Datacenter list.")
@@ -96,8 +95,8 @@ class AppMetrics:
             for dc in container_datacenter.view:
                 logging.debug("Getting through Clusters in {datacenter}.".format(datacenter=dc.name))
                 for cl in dc.hostFolder.childEntity:
-                    logging.debug("Getting through ESXis in {cluster}.".format(cluster=cl.name))
-                    if cl.name != "Pool-off":
+                    if hasattr(cl, 'host'):
+                        logging.debug("Getting through ESXis in {cluster}.".format(cluster=cl.name))
                         for host in cl.host:
                             logging.debug("Getting through VMs in {esxi}.".format(esxi=host.name))
                             for vm in host.vm:
