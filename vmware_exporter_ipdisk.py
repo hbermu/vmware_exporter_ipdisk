@@ -108,8 +108,9 @@ class AppMetrics:
                 logging.debug("Disks")
                 for device in child.config.hardware.device:
                     if 2000 <= device.key <= 2100:
+                        print(child.config.hardware.device)
                         disk_index = str(device.deviceInfo.label).split(" ")[-1]
-                        disk_size = int(str(device.deviceInfo.summary.split(" ")[0].replace(",", "")))*1000
+                        disk_size = int(str(device.deviceInfo.summary.split(" ")[0].replace(",", "")))*1024
                         self.vmware_vm_disk.labels(vm_name=child.summary.config.name,
                                                    vm_disk_index=disk_index).set(disk_size)
 

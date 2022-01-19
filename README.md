@@ -14,6 +14,12 @@ Get VMware vCenter information:
 - Run `$ python3 vmware_exporter_ipdisk.py`
 - Go to http://localhost:9372/
 
+#### Docker
+You can run the exporter with docker:
+```
+docker run -p 9372:9372 -v config.yml:/vmware_exporter_ipdisk/config.yml hbermu/vmware_exporter_ipdisk
+```
+
 ### Configuration
 If you do plan to use a configuration file different from `./config.yml`, be sure to override the container entrypoint with -c path/to/your/config.yml to the command arguments.
 

@@ -130,3 +130,6 @@ dmypy.json
 
 # IDES
 .idea
+
+# Project
+config_custom.yaml
