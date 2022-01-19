@@ -2,7 +2,7 @@
 FROM python:3.8-alpine3.15
 LABEL maintainer="hbermu <hbermu@protonmail.ch>"
 LABEL name="vmware_exporter_ipdisk" \
-        version="0.0.2" \
+        version="0.1.0" \
         license="Apache License 2.0"
 
 RUN mkdir /vmware_exporter_ipdisk

@@ -42,9 +42,9 @@ class AppMetrics:
 
         # Prometheus metrics to collect
         self.vmware_vm_net_ip = Gauge('vmware_vm_net_ip', 'IP of the VM',
-                                      labelnames=['vm_name', 'vm_ip'])
+                                      labelnames=['cluster_name', 'dc_name', 'host_name', 'vm_name', 'vm_ip'])
         self.vmware_vm_disk = Gauge('vmware_vm_disk_size', 'Size in bytes of the attached disk',
-                                    labelnames=['vm_name', 'vm_disk_index'])
+                                    labelnames=['cluster_name', 'dc_name', 'host_name', 'vm_name', 'vm_disk_index'])
 
     def run_metrics_loop(self):
         """Metrics fetching loop"""
@@ -90,30 +90,40 @@ class AppMetrics:
             logging.debug("Object types to look for: VirtualMachine.")
             view_type = [vim.VirtualMachine]
             recursive = True
-            logging.debug("Getting all VMs.")
-            container_view = content.viewManager.CreateContainerView(
-                container, view_type, recursive)
 
-            children = container_view.view
-            logging.info("Getting through the entire VMs list")
-            for child in children:
-                logging.debug("Working with VM: {vm}.".format(vm=child.summary.config.name))
-                logging.debug("Getting IPs")
-                if child.summary.guest is not None and child.summary.guest.ipAddress is not None:
-                    for nic in child.guest.net:
-                        addresses = nic.ipConfig.ipAddress
-                        for adr in addresses:
-                            self.vmware_vm_net_ip.labels(vm_name=child.summary.config.name,
-                                                         vm_ip=str(adr.ipAddress) + "/" + str(adr.prefixLength)).set(1)
-                logging.debug("Disks")
-                for device in child.config.hardware.device:
-                    if 2000 <= device.key <= 2100:
-                        print(child.config.hardware.device)
-                        disk_index = str(device.deviceInfo.label).split(" ")[-1]
-                        disk_size = int(str(device.deviceInfo.summary.split(" ")[0].replace(",", "")))*1024
-                        self.vmware_vm_disk.labels(vm_name=child.summary.config.name,
-                                                   vm_disk_index=disk_index).set(disk_size)
-
+            logging.debug("Getting through the entire Datacenter list.")
+            container_datacenter = content.viewManager.CreateContainerView(container, [vim.Datacenter], recursive)
+            for dc in container_datacenter.view:
+                logging.debug("Getting through Clusters in {datacenter}.".format(datacenter=dc.name))
+                for cl in dc.hostFolder.childEntity:
+                    logging.debug("Getting through ESXis in {cluster}.".format(cluster=cl.name))
+                    if cl.name != "Pool-off":
+                        for host in cl.host:
+                            logging.debug("Getting through VMs in {esxi}.".format(esxi=host.name))
+                            for vm in host.vm:
+                                logging.debug("Working with VM: {vm}.".format(vm=vm.summary.config.name))
+                                logging.debug("Getting IPs")
+                                if vm.summary.guest is not None and vm.summary.guest.ipAddress is not None:
+                                    for nic in vm.guest.net:
+                                        addresses = nic.ipConfig.ipAddress
+                                        for adr in addresses:
+                                            self.vmware_vm_net_ip.labels(dc_name=dc.name,
+                                                                         cluster_name=cl.name,
+                                                                         host_name=host.name,
+                                                                         vm_name=vm.summary.config.name,
+                                                                         vm_ip=str(adr.ipAddress) + "/" +
+                                                                               str(adr.prefixLength)).set(1)
+                                logging.debug("Disks")
+                                for device in vm.config.hardware.device:
+                                    if 2000 <= device.key <= 2100:
+                                        disk_index = str(device.deviceInfo.label).split(" ")[-1]
+                                        disk_size = int(
+                                            str(device.deviceInfo.summary.split(" ")[0].replace(",", ""))) * 1024
+                                        self.vmware_vm_disk.labels(dc_name=dc.name,
+                                                                   cluster_name=cl.name,
+                                                                   host_name=host.name,
+                                                                   vm_name=vm.summary.config.name,
+                                                                   vm_disk_index=disk_index).set(disk_size)
             logging.debug("All VMs metrics added.")
 
         except vmodl.MethodFault as error:
