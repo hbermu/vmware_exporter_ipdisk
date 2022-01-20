@@ -5,10 +5,12 @@ VMware vCenter Exporter for Prometheus.
 Get VMware vCenter information:
 - VMs IPs
 - VMs Disks and Size
+- VMs hostnames
 
 ## Usage
 
 *Requires Python >= 3.8*
+*Requires [VMware Tools](https://docs.vmware.com/en/VMware-Tools/index.html) installed on VM*
 
 - Install requirements with `$python3 -m pip install -r requirements.txt`
 - Run `$ python3 vmware_exporter_ipdisk.py`
