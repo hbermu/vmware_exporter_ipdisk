@@ -77,10 +77,12 @@ class AppMetrics:
 
         except IOError as io_error:
             logging.info("Error connecting: {error}".format(error=io_error))
-            raise SystemExit("Error connecting.")
+            logging.info("Starting Again")
+            return()
         if not service_instance:
             logging.info("Unable to connect to host with supplied credentials.")
-            raise SystemExit("Unable to connect to host with supplied credentials.")
+            logging.info("Starting Again")
+            return ()
         atexit.register(Disconnect, service_instance)
 
         try:
@@ -127,7 +129,7 @@ class AppMetrics:
 
         except vmodl.MethodFault as error:
             logging.info("Caught vmodl fault: {error}.".format(error=error))
-            raise SystemExit("Caught vmodl fault.")
+            logging.info("Starting Again")
 
 
 def main():
