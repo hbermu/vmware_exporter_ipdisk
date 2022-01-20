@@ -41,10 +41,13 @@ class AppMetrics:
         self.polling_interval_seconds = polling_interval_seconds
 
         # Prometheus metrics to collect
-        self.vmware_vm_net_ip = Gauge('vmware_vm_net_ip', 'IP of the VM',
-                                      labelnames=['cluster_name', 'dc_name', 'host_name', 'vm_name', 'vm_ip'])
-        self.vmware_vm_disk = Gauge('vmware_vm_disk_size', 'Size in bytes of the attached disk',
-                                    labelnames=['cluster_name', 'dc_name', 'host_name', 'vm_name', 'vm_disk_index'])
+        self.vmware_vm_guest_net_ipConfig_ipAddress = Gauge('vmware_vm_guest_net_ipConfig_ipAddress', 'IP of the VM',
+                                                            labelnames=['cluster_name', 'dc_name', 'host_name',
+                                                                        'vm_name', 'vm_ip'])
+        self.vmware_vm_guest_config_hardware_device_size = Gauge('vmware_vm_guest_config_hardware_device_size',
+                                                                 'Size in bytes of the attached disk',
+                                                                 labelnames=['cluster_name', 'dc_name', 'host_name',
+                                                                             'vm_name', 'vm_disk_index'])
 
     def run_metrics_loop(self):
         """Metrics fetching loop"""
@@ -108,11 +111,11 @@ class AppMetrics:
                                     for nic in vm.guest.net:
                                         addresses = nic.ipConfig.ipAddress
                                         for adr in addresses:
-                                            self.vmware_vm_net_ip.labels(dc_name=dc.name,
-                                                                         cluster_name=cl.name,
-                                                                         host_name=host.name,
-                                                                         vm_name=vm.summary.config.name,
-                                                                         vm_ip=str(adr.ipAddress) + "/" +
+                                            self.vmware_vm_guest_net_ipConfig_ipAddress.labels(dc_name=dc.name,
+                                                                                               cluster_name=cl.name,
+                                                                                               host_name=host.name,
+                                                                                               vm_name=vm.summary.config.name,
+                                                                                               vm_ip=str(adr.ipAddress) + "/" +
                                                                                str(adr.prefixLength)).set(1)
                                 logging.debug("Disks")
                                 for device in vm.config.hardware.device:
@@ -120,11 +123,13 @@ class AppMetrics:
                                         disk_index = str(device.deviceInfo.label).split(" ")[-1]
                                         disk_size = int(
                                             str(device.deviceInfo.summary.split(" ")[0].replace(",", ""))) * 1024
-                                        self.vmware_vm_disk.labels(dc_name=dc.name,
-                                                                   cluster_name=cl.name,
-                                                                   host_name=host.name,
-                                                                   vm_name=vm.summary.config.name,
-                                                                   vm_disk_index=disk_index).set(disk_size)
+                                        self.vmware_vm_guest_config_hardware_device_size.labels(dc_name=dc.name,
+                                                                                                cluster_name=cl.name,
+                                                                                                host_name=host.name,
+                                                                                                vm_name=vm.summary.config.name,
+                                                                                                vm_disk_index=disk_index).set(disk_size)
+
+                                # vm.summary.guest.hostName
             logging.debug("All VMs metrics added.")
 
         except vmodl.MethodFault as error:
