@@ -58,6 +58,9 @@ class AppMetrics:
         while True:
             self.fetch()
             time.sleep(self.polling_interval_seconds)
+            self.vmware_vm_guest_net_ipConfig_ipAddress.clear()
+            self.vmware_vm_config_hardware_device_size.clear()
+            self.vmware_vm_guest_hostname.clear()
 
     def fetch(self):
         """
@@ -158,7 +161,7 @@ def main():
     parser.add_argument('-p', '--port', dest='port', type=int,
                         default=9372, help="HTTP port to expose metrics")
     parser.add_argument('-t', '--time', dest='time', type=int,
-                        default=1, help="Time in seconds between get VMWare values")
+                        default=1800, help="Time in seconds between get VMWare values")
     parser.add_argument('-l', '--loglevel', dest='loglevel',
                         default="INFO", help="Set application loglevel INFO, DEBUG")
     parser.add_argument('-v', '--version', action="version",
