@@ -121,16 +121,17 @@ class AppMetrics:
                                                                                                vm_ip=str(adr.ipAddress) + "/" +
                                                                                str(adr.prefixLength)).set(1)
                                 logging.debug("Getting Disks")
-                                for device in vm.config.hardware.device:
-                                    if 2000 <= device.key <= 2100:
-                                        disk_index = str(device.deviceInfo.label).split(" ")[-1]
-                                        disk_size = int(
-                                            str(device.deviceInfo.summary.split(" ")[0].replace(",", ""))) * 1024
-                                        self.vmware_vm_config_hardware_device_size.labels(dc_name=dc.name,
-                                                                                          cluster_name=cl.name,
-                                                                                          host_name=host.name,
-                                                                                          vm_name=vm.summary.config.name,
-                                                                                          vm_disk_index=disk_index).set(disk_size)
+                                if hasattr(vm.config, 'hardware'):
+                                    for device in vm.config.hardware.device:
+                                        if 2000 <= device.key <= 2100:
+                                            disk_index = str(device.deviceInfo.label).split(" ")[-1]
+                                            disk_size = int(
+                                                str(device.deviceInfo.summary.split(" ")[0].replace(",", ""))) * 1024
+                                            self.vmware_vm_config_hardware_device_size.labels(dc_name=dc.name,
+                                                                                              cluster_name=cl.name,
+                                                                                              host_name=host.name,
+                                                                                              vm_name=vm.summary.config.name,
+                                                                                              vm_disk_index=disk_index).set(disk_size)
 
                                 logging.debug("Getting VM Hostname")
                                 if vm.summary.guest is not None and vm.summary.guest.hostName is not None:
